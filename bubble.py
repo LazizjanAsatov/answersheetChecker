@@ -13,10 +13,26 @@ class AnswerSheetGrader:
         self.sections = [
             {"questions": 7, "choices": 5, "roi": (20, 255, 55, 200)},  # Questions 1-7
             {"questions": 7, "choices": 5, "roi": (79, 255, 48, 200)},  # Questions 8-14
-            {"questions": 7, "choices": 5, "roi": (129, 255, 48, 200),},  # Questions 15-21
-            {"questions": 7, "choices": 5, "roi": (184, 255, 48, 200),},  # Questions 22-28
-            {"questions": 4, "choices": 5, "roi": (238, 255, 48, 110),},  # Questions 29-32
-            {"questions": 3, "choices": 7, "roi": (238, 375, 65, 80),},  # Questions 33-35
+            {
+                "questions": 7,
+                "choices": 5,
+                "roi": (129, 255, 48, 200),
+            },  # Questions 15-21
+            {
+                "questions": 7,
+                "choices": 5,
+                "roi": (184, 255, 48, 200),
+            },  # Questions 22-28
+            {
+                "questions": 4,
+                "choices": 5,
+                "roi": (238, 255, 48, 110),
+            },  # Questions 29-32
+            {
+                "questions": 3,
+                "choices": 7,
+                "roi": (238, 375, 65, 80),
+            },  # Questions 33-35
         ]
 
         self.correct_answers = [
@@ -83,22 +99,17 @@ class AnswerSheetGrader:
                     marked_answer = 0  # Invalid answer (no mark or multiple marks)
                 else:
                     # Get the single marked answer
-                    marked_answer = question_answers.index(max(question_answers)) 
+                    marked_answer = question_answers.index(max(question_answers))
 
                 section_answers.append(marked_answer)
-                print(
-                    f"Question {q+1}: Marked answers count: {marked_answers}, Selected answer: {marked_answer}"
-                )  # Debug
 
             return section_answers
 
         except Exception as e:
-            print(f"Error processing section: {e}")
             return [0] * section["questions"]
 
     def grade_test(self, img):
         try:
-            # Resize and preprocess
             img = cv2.resize(img, (self.width, self.height))
             img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             img_blur = cv2.GaussianBlur(img_gray, (5, 5), 1)
@@ -109,7 +120,6 @@ class AnswerSheetGrader:
             for section in self.sections:
                 section_answers = self.process_section(section, img_blur)
                 self.student_answers.append(section_answers)
-                print(f"Section answers: {section_answers}")  # Debug print
 
             # Calculate score
             score = 0
@@ -125,5 +135,4 @@ class AnswerSheetGrader:
             return score, total_questions, self.student_answers
 
         except Exception as e:
-            print(f"Error grading test: {e}")
             return 0, 0, []

@@ -3,7 +3,7 @@ import numpy as np
 
 
 def extract_id(thresh, roi, num_digits=7, num_options=10, min_fill_threshold=20):
-    
+
     id_x, id_y, id_w, id_h = roi
     id_roi = thresh[id_y : id_y + id_h, id_x : id_x + id_w]
     bubble_height = id_h // num_options
@@ -26,9 +26,6 @@ def extract_id(thresh, roi, num_digits=7, num_options=10, min_fill_threshold=20)
             # Count white pixels in the bubble
             filled_pixels = np.sum(bubble == 255)
 
-            # Debugging: Print the filled pixel count
-            print(f"Digit {i}, Option {j}, Pixels: {filled_pixels}")
-
             # Update the selected bubble if it has the most pixels
             if filled_pixels > max_pixels:
                 max_pixels = filled_pixels
@@ -45,22 +42,50 @@ def extract_id(thresh, roi, num_digits=7, num_options=10, min_fill_threshold=20)
     return student_id
 
 
-path = "./answers2.jpg"  # Replace with your image path
-img = cv2.imread(path)
-img = cv2.resize(img, (700, 700))  # Resize for consistent processing
-gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-_, thresh = cv2.threshold(gray, 170, 255, cv2.THRESH_BINARY_INV)  # Binary thresholding
+def visualize_rois(img, rois, roi_type=None):
+    """
+    Visualize the defined ROIs on the image with different colors for different ROI types.
+    Returns the annotated image.
 
-# Define the ROI for the student ID section
-rois = [(131, 110, 59, 132)]  # Replace with your specific ROI coordinates
+    Colors:
+    - Multiple choice (bubble): Blue
+    - Student ID: Red
+    - Personal info: Green
+    - Open questions: Purple
+    """
+    img_copy = img.copy()
 
-# Extract student ID
-student_id = extract_id(thresh, rois[0])
-print("Student ID:", "".join(map(str, student_id)))
+    # Define colors for different ROI types (BGR format)
+    colors = {
+        "bubble_sections": (255, 0, 0),  # Blue
+        "student_id": (0, 0, 255),  # Red
+        "personal_info": (0, 255, 0),  # Green
+        "open_questions": (255, 0, 255),  # Purple
+        "default": (0, 255, 0),  # Default green
+    }
 
-# Visualize the ROI and detected bubbles
-for x, y, w, h in rois:
-    cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
-cv2.imshow("Processed Image", img)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+    # If rois is a dictionary, process each type separately
+    if isinstance(rois, dict):
+        for roi_type, roi_data in rois.items():
+            color = colors.get(roi_type, colors["default"])
+
+            # Handle bubble sections differently as they're in a different format
+            if roi_type == "bubble_sections":
+                for section in roi_data:
+                    x, y, w, h = section["roi"]
+                    cv2.rectangle(img_copy, (x, y), (x + w, y + h), color, 2)
+            # Handle student_id which is a single tuple
+            elif roi_type == "student_id":
+                x, y, w, h = roi_data
+                cv2.rectangle(img_copy, (x, y), (x + w, y + h), color, 2)
+            # Handle other ROI types that are lists of tuples
+            else:
+                for x, y, w, h in roi_data:
+                    cv2.rectangle(img_copy, (x, y), (x + w, y + h), color, 2)
+    # If rois is a list, use single color based on roi_type
+    else:
+        color = colors.get(roi_type, colors["default"])
+        for x, y, w, h in rois:
+            cv2.rectangle(img_copy, (x, y), (x + w, y + h), color, 2)
+
+    return img_copy
