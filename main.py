@@ -55,7 +55,28 @@ def process_answer_sheet(image_path, width=700, height=700):
     img = cv2.resize(img, (width, height))
 
     # Process multiple choice
-    score, total, answers = grader.grade_test(img)
+    result = grader.grade_test(img)
+    if isinstance(result, tuple):
+        if len(result) == 4:
+            score, total, answers, _ = result
+        else:
+            score, total, answers = result
+    elif isinstance(result, dict):
+        score = result.get("score", 0)
+        total = result.get("total", 0)
+        answers = result.get("answers", [])
+    elif isinstance(result, list):
+        # Assuming the list contains the answers
+        answers = result
+        total = len(answers)
+        score = sum(
+            1 for ans in answers if ans is not None
+        )  # Count non-None answers as correct
+    else:
+        # Fallback
+        answers = []
+        total = 0
+        score = 0
 
     # Process student ID
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -86,6 +107,28 @@ if __name__ == "__main__":
         f"Multiple Choice Score: {results['multiple_choice']['score']}/{results['multiple_choice']['total']}"
     )
     print(f"Student ID: {''.join(map(str, results['student_id']))}")
+
+    # Print multiple choice answers in formatted way
+    print("\nMultiple Choice Answers:")
+    answers = results["multiple_choice"]["answers"]
+
+    # Print all answers, including unmarked ones
+    if isinstance(answers, list):
+        for i, answer in enumerate(answers):
+            if answer is None:
+                print(f"Q{i+1:2d}- 0")
+            elif isinstance(answer, list):
+                # Filter out any false positives (threshold check)
+                valid_marks = [a for a in answer if isinstance(a, int)]
+                if not valid_marks:
+                    print(f"Q{i+1:2d}- 0")
+                else:
+                    print(f"Q{i+1:2d}- {','.join(map(str, valid_marks))}")
+            elif isinstance(answer, int):
+                print(f"Q{i+1:2d}- {answer + 1}")
+            else:
+                print(f"Q{i+1:2d}- 0")
+
     print("\nPersonal Information:")
     for info in results["personal_info"]:
         print(f"- {info}")

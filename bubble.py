@@ -9,41 +9,6 @@ class AnswerSheetGrader:
         self.student_answers = []
         self.min_threshold = 50  # Adjusted threshold for individual boxes
 
-        # Define sections and their properties
-        self.sections = [
-            {"questions": 7, "choices": 5, "roi": (20, 255, 55, 200)},  # Questions 1-7
-            {"questions": 7, "choices": 5, "roi": (79, 255, 48, 200)},  # Questions 8-14
-            {
-                "questions": 7,
-                "choices": 5,
-                "roi": (129, 255, 48, 200),
-            },  # Questions 15-21
-            {
-                "questions": 7,
-                "choices": 5,
-                "roi": (184, 255, 48, 200),
-            },  # Questions 22-28
-            {
-                "questions": 4,
-                "choices": 5,
-                "roi": (238, 255, 48, 110),
-            },  # Questions 29-32
-            {
-                "questions": 3,
-                "choices": 7,
-                "roi": (238, 375, 65, 80),
-            },  # Questions 33-35
-        ]
-
-        self.correct_answers = [
-            [2, 2, 3, 2, 1, 2, 4],  # Questions 1-7
-            [3, 2, 3, 2, 1, 2, 4],  # Questions 8-14
-            [3, 2, 3, 2, 1, 2, 4],  # Questions 15-21
-            [3, 2, 3, 2, 1, 2, 4],  # Questions 22-28
-            [3, 2, 3, 2],  # Questions 29-32
-            [3, 2, 3],  # Questions 33-35
-        ]
-
     def get_box_answer(self, box):
         """Count non-zero pixels in a box"""
         try:
@@ -121,18 +86,7 @@ class AnswerSheetGrader:
                 section_answers = self.process_section(section, img_blur)
                 self.student_answers.append(section_answers)
 
-            # Calculate score
-            score = 0
-            total_questions = sum(len(section) for section in self.correct_answers)
-
-            for student_section, correct_section in zip(
-                self.student_answers, self.correct_answers
-            ):
-                for student_ans, correct_ans in zip(student_section, correct_section):
-                    if student_ans == correct_ans:
-                        score += 1
-
-            return score, total_questions, self.student_answers
+            return self.student_answers
 
         except Exception as e:
-            return 0, 0, []
+            return []
