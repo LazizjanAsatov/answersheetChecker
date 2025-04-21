@@ -22,3 +22,5 @@ This project was both challenging and rewarding, involving:
 ## 📬 Connect with Me  
 I'm always excited to connect with fellow developers, collaborators, and recruiters. Feel free to reach out to me on LinkedIn:
 [![LinkedIn - Lazizjon Asatov](https://img.shields.io/badge/LinkedIn-Lazizjon%20Asatov-blue?style=flat&logo=linkedin)](https://www.linkedin.com/in/lazizjon-asatov/)
+
+![telegram-cloud-photo-size-2-5204393704754900531-y](https://github.com/user-attachments/assets/0de40142-19ce-497c-9541-4eec15460c94)
